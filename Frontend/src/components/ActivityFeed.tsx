@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import api from '../api/axios'
 import socket from '../socket/socket'
 
@@ -17,7 +17,7 @@ const ActivityFeed = ({ projectId }: { projectId?: string }) => {
   useEffect(() => {
     const fetchLogs = async () => {
       try {
-        const url = projectId ? `/tasks/activity/${projectId}` : '/tasks/activity'
+        const url = projectId ? `/tasks/project/${projectId}/activity` : '/tasks/activity'
         const res = await api.get(url)
         setLogs(res.data)
       } catch {
