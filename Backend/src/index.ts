@@ -18,11 +18,14 @@ import { startOverdueJob } from './jobs/overdueTask'
 const app = express()
 const httpServer = createServer(app)
 
+// Get cleaned frontend URL (strip trailing slashes and paths)
+const frontendUrl = (process.env.FRONTEND_URL || 'http://localhost:5173').replace(/\/$/, '').split(/(?<=https?:\/\/[^\/]+)\//)[0]
+
 export const io = new Server(httpServer, {
-  cors: { origin: process.env.FRONTEND_URL || 'http://localhost:5173', credentials: true }
+  cors: { origin: frontendUrl, credentials: true }
 })
 
-app.use(cors({ origin: process.env.FRONTEND_URL || 'http://localhost:5173', credentials: true }))
+app.use(cors({ origin: frontendUrl, credentials: true }))
 app.use(express.json())
 app.use(cookieParser())
 app.set('io', io)
