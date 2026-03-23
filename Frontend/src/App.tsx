@@ -7,26 +7,23 @@ import PMDashboard from './pages/PMDashboard'
 import DevDashboard from './pages/DevDashboard'
 
 const ProtectedRoute = ({ children, role }: { children: React.ReactElement, role: string }) => {
-  const { user } = useAuth()
+  const { user, initialized } = useAuth()
+  if (!initialized) return null
   if (!user) return <Navigate to="/login" />
-  if (user.role !== role) return <Navigate to="/login" />
+  if (role && user.role !== role) return <Navigate to="/login" />
   return children
 }
 
 const AppRoutes = () => {
-  const { user } = useAuth()
+  const { user, initialized } = useAuth()
+  if (!initialized) return <div style={{ display: 'flex', height: '100vh', alignItems: 'center', justifyContent: 'center' }}>Loading...</div>
+
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
-      <Route path="/admin" element={
-        <ProtectedRoute role="ADMIN"><AdminDashboard /></ProtectedRoute>
-      } />
-      <Route path="/pm" element={
-        <ProtectedRoute role="PM"><PMDashboard /></ProtectedRoute>
-      } />
-      <Route path="/dev" element={
-        <ProtectedRoute role="DEVELOPER"><DevDashboard /></ProtectedRoute>
-      } />
+      <Route path="/admin" element={<ProtectedRoute role="ADMIN"><AdminDashboard /></ProtectedRoute>} />
+      <Route path="/pm" element={<ProtectedRoute role="PM"><PMDashboard /></ProtectedRoute>} />
+      <Route path="/dev" element={<ProtectedRoute role="DEVELOPER"><DevDashboard /></ProtectedRoute>} />
       <Route path="*" element={<Navigate to={user ? `/${user.role.toLowerCase()}` : '/login'} />} />
     </Routes>
   )

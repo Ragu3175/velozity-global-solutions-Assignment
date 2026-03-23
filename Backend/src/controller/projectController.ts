@@ -78,16 +78,30 @@ export const deleteProject = async (req: AuthRequest, res: Response) => {
   try {
     const { id: userId, role } = req.user!
     const project = await prisma.project.findUnique({
-      where: { id: String(req.params.id) }
+      where: { id: String(req.params.id) },
+      include: { tasks: { select: { id: true } } }
     })
 
     if (!project) return res.status(404).json({ error: 'Project not found' })
     if (role === 'PM' && project.managerId !== userId)
       return res.status(403).json({ error: 'Access denied' })
 
-    await prisma.project.delete({ where: { id: String(req.params.id) } })
+    const taskIds = project.tasks.map(t => t.id)
+
+    await prisma.$transaction([
+      // 1. Delete notifications related to the project's tasks
+      prisma.notification.deleteMany({ where: { taskId: { in: taskIds } } }),
+      // 2. Delete activity logs of the project and its tasks
+      prisma.activityLog.deleteMany({ where: { projectId: project.id } }),
+      // 3. Delete tasks of the project
+      prisma.task.deleteMany({ where: { projectId: project.id } }),
+      // 4. Finally delete the project
+      prisma.project.delete({ where: { id: project.id } })
+    ])
+
     return res.json({ message: 'Project deleted' })
-  } catch {
+  } catch (e) {
+    console.error('Project deletion failed:', e)
     return res.status(500).json({ error: 'Server error' })
   }
 }

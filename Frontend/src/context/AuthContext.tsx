@@ -11,6 +11,7 @@ interface AuthContextType {
   token: string | null
   login: (token: string, user: User) => void
   logout: () => void
+  initialized: boolean
 }
 
 const AuthContext = createContext<AuthContextType | null>(null)
@@ -18,6 +19,7 @@ const AuthContext = createContext<AuthContextType | null>(null)
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null)
   const [token, setToken] = useState<string | null>(null)
+  const [initialized, setInitialized] = useState(false)
 
   useEffect(() => {
     const savedToken = localStorage.getItem('accessToken')
@@ -26,6 +28,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setToken(savedToken)
       setUser(JSON.parse(savedUser))
     }
+    setInitialized(true)
   }, [])
 
   const login = (token: string, user: User) => {
@@ -43,7 +46,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   }
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logout }}>
+    <AuthContext.Provider value={{ user, token, login, logout, initialized }}>
       {children}
     </AuthContext.Provider>
   )

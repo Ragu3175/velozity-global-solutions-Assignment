@@ -122,6 +122,13 @@ const AdminDashboard = () => {
     }
   }
 
+  const deleteProject = async (projectId: string) => {
+    if (!confirm('Delete this project?')) return
+    await api.delete(`/projects/${projectId}`)
+    setSelectedProject('')
+    fetchProjects()
+  }
+
   const allTasks = projects.flatMap(p => p.tasks)
   const selectedTasks = projects
     .find(p => p.id === selectedProject)?.tasks
@@ -172,10 +179,19 @@ const AdminDashboard = () => {
         </div>
 
         {/* Project selector */}
-        <select value={selectedProject} onChange={e => setSelectedProject(e.target.value)}
-          style={{ padding: '6px 12px', borderRadius: 4, border: '1px solid #ccc', marginBottom: 16 }}>
-          {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
-        </select>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
+          <select value={selectedProject} onChange={e => setSelectedProject(e.target.value)}
+            style={{ padding: '6px 12px', borderRadius: 4, border: '1px solid #ccc' }}>
+            <option value="">Select a Project</option>
+            {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+          </select>
+          {selectedProject && (
+            <button onClick={() => deleteProject(selectedProject)}
+              style={{ padding: '6px 14px', background: '#ef4444', color: 'white', border: 'none', borderRadius: 4, cursor: 'pointer' }}>
+              Delete Project
+            </button>
+          )}
+        </div>
 
         {/* Filters */}
         <div style={{ display: 'flex', gap: 12, marginBottom: 24 }}>
