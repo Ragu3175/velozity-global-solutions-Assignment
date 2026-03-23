@@ -48,7 +48,11 @@ export const getProjects = async (req: AuthRequest, res: Response) => {
     const { role, id } = req.user!
     const projects = await prisma.project.findMany({
       where: role === 'ADMIN' ? {} : { managerId: id },
-      include: { client: true, tasks: true }
+      include: {
+        client: true,
+        manager: { select: { name: true } },
+        tasks: { include: { assignee: { select: { name: true } } } }
+      }
     })
     return res.json(projects)
   } catch {
@@ -61,7 +65,11 @@ export const getProjectById = async (req: AuthRequest, res: Response) => {
     const { id: userId, role } = req.user!
     const project = await prisma.project.findUnique({
       where: { id: String(req.params.id) },
-      include: { tasks: true, client: true }
+      include: {
+        client: true,
+        manager: { select: { name: true } },
+        tasks: { include: { assignee: { select: { name: true } } } }
+      }
     })
 
     if (!project) return res.status(404).json({ error: 'Project not found' })
