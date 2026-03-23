@@ -19,6 +19,7 @@ interface Project {
   id: string
   name: string
   tasks: Task[]
+  manager?: { name: string }
 }
 
 const AdminDashboard = () => {
@@ -183,7 +184,11 @@ const AdminDashboard = () => {
           <select value={selectedProject} onChange={e => setSelectedProject(e.target.value)}
             style={{ padding: '6px 12px', borderRadius: 4, border: '1px solid #ccc' }}>
             <option value="">Select a Project</option>
-            {projects.map(p => <option key={p.id} value={p.id}>{p.name}</option>)}
+            {projects.map(p => (
+              <option key={p.id} value={p.id}>
+                {p.name} {p.manager?.name ? `(PM: ${p.manager.name})` : ''}
+              </option>
+            ))}
           </select>
           {selectedProject && (
             <button onClick={() => deleteProject(selectedProject)}
